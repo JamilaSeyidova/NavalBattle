@@ -1,5 +1,6 @@
 package project;
 
+
 import acm.graphics.GPolygon;
 
 public class Cell {
