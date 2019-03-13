@@ -5,7 +5,6 @@ import java.awt.Color;
 import acm.graphics.GCompound;
 import acm.graphics.GPolygon;
 
-
 public class Boat extends GCompound {
 	public int lenght;
 	private boolean isSunk;

@@ -1,6 +1,5 @@
 package project;
 
-
 public class Player {
 
 	private boolean isTurn = false;
