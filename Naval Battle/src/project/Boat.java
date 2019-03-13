@@ -1,6 +1,6 @@
 package project;
 
-import com.sun.corba.se.impl.oa.poa.Policies;
+import java.awt.Color;
 
 import acm.graphics.GCompound;
 import acm.graphics.GPolygon;
@@ -8,33 +8,34 @@ import acm.graphics.GPolygon;
 public class Boat extends GCompound {
 	public int lenght;
 	private boolean isSunk;
-	private int x;
-	private int y;
+	private double x;
+	private double y;
 	private boolean isHorizontal;
 
-	public Boat(int lenght, int x, int y, boolean isHor) {
+	public Boat(int lenght, boolean isHor, Cell cel) {
 		this.lenght = lenght;
 		this.isSunk = false;
-		this.x = x;
-		this.y = y;
+		this.x = cel.getNumCor();
+		this.y = cel.getCharIndex();
 		this.isHorizontal = isHor;
-		GPolygon boat = drawBoat(lenght, isHor);
-		add(boat, x, y);
+		
+		for(int i = 0; i < lenght; i++) {
+			if(isHor) {
+				GPolygon c = Cell.createCell();
+				c.setFilled(true);
+				c.setFillColor(Color.CYAN);
+				add(c, i*Cell.CELL_SIZE, 0);
+			}
+			else {
+				GPolygon c = Cell.createCell();
+				c.setFilled(true);
+				c.setFillColor(Color.CYAN);
+				add(c, 0, i*Cell.CELL_SIZE);
+			}
+			
+		}
+//		add(boat, x, y);
 	}
 
-	public GPolygon drawBoat(int size, boolean isHor) {
-		GPolygon poly = new GPolygon();
-		if (isHor == true) {
-			poly.addVertex(-(Cell.CELL_SIZE * size / 2), 0);
-			poly.addArc(Cell.CELL_SIZE * size / 2, 0, 180, 0);
-			poly.addArc(-(Cell.CELL_SIZE * size / 2), 0, 0, -180);
-		}
-		else {
-			poly.addVertex(0, -(Cell.CELL_SIZE * size / 2));
-			poly.addArc(0, Cell.CELL_SIZE * size / 2, 90, -90);
-			poly.addArc(0, -(Cell.CELL_SIZE * size / 2), -90, -270);
-		}
-		return poly;
-	}
 
 }

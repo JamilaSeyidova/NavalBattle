@@ -13,7 +13,7 @@ public class Field extends GCompound {
 		for (int i : cellAlongHeight) {
 			for (char ch : cellAlongWidth) {
 				Cell cell = new Cell(i, ch, chIndex);
-				GPolygon c = createCell();
+				GPolygon c = Cell.createCell();
 				add(c, (i - 0.5) * Cell.CELL_SIZE, (chIndex - 0.5) * Cell.CELL_SIZE);
 				chIndex++;
 			}
@@ -21,13 +21,5 @@ public class Field extends GCompound {
 		}
 	}
 
-	// draw rect using a gpolygon
-	private GPolygon createCell() {
-		GPolygon poly = new GPolygon();
-		poly.addVertex(-Cell.CELL_SIZE / 2, -Cell.CELL_SIZE / 2);
-		poly.addVertex(Cell.CELL_SIZE / 2, -Cell.CELL_SIZE / 2);
-		poly.addVertex(Cell.CELL_SIZE / 2, Cell.CELL_SIZE / 2);
-		poly.addVertex(-Cell.CELL_SIZE / 2, Cell.CELL_SIZE / 2);
-		return poly;
-	}
+	
 }

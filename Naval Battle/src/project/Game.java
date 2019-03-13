@@ -1,10 +1,7 @@
 package project;
 
-import java.awt.Color;
-import java.awt.event.MouseEvent;
-import acm.graphics.GObject;
-import acm.graphics.GPoint;
-import acm.graphics.GRect;
+//import acm.graphics.GObject;
+//import acm.graphics.GPoint;
 import acm.program.*;
 
 public class Game extends GraphicsProgram {
@@ -15,10 +12,12 @@ public class Game extends GraphicsProgram {
 		setSize(21 * (int) Cell.CELL_SIZE, 15 * (int) Cell.CELL_SIZE);
 		f = new Field();
 		add(f);
-		Boat b = new Boat(1, 1500, 50, true);
-		Boat d = new Boat(1, 1500, 150, false);
-		add(b);
-		add(d);
+		Boat b = new Boat(5, false, new Cell(5, 'k', 9));// poluchayetsya ccto mne bex raznici gde ya xochu ctobi cell naxodilsya 
+														// ispravit eto
+//		Cell cell = new Cell(1, c, chInex)
+//		Boat d = new Boat(1, 0, 0, false);
+		add(b, 50/2, 50/2);
+//		add(d);
 		// add(aircraftCarrier, 50*11, 50);
 		// GRect carrier;
 		// GRect battleship;
@@ -78,8 +77,8 @@ public class Game extends GraphicsProgram {
 
 	/* Constants specifying feature size as a fraction of the head size */
 
-	private GObject gobj;
-	private GPoint last;
+//	private GObject gobj;
+//	private GPoint last;
 	Field f;
 
 	public static void main(String[] args) {
