@@ -1,12 +1,16 @@
 package ships;
 
-
+import others.BattleField;
 
 public class BattleShip extends Ship {
 
 	public BattleShip(String name) {
 		super(name);
-		length = 4;
+//		setSize(getWidth(), BattleField.SIDE*4);
+		
+		len_h = 1;
+		len_v = 4;
+		normalize();
 	}
 
 	
