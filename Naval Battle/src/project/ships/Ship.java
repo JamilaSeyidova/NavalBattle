@@ -1,13 +1,13 @@
 package ships;
 
-import java.awt.Image;
-
 import acm.graphics.GImage;
 import others.BattleField;
 
 public abstract class Ship extends GImage {
 	int len_h, len_v;
 	POSE pose;
+
+
 	boolean isDestroyed;
 	String imageName;
 	boolean isFinal;
@@ -24,7 +24,6 @@ public abstract class Ship extends GImage {
 	}
 
 	protected void normalize() {
-		System.out.println(len_h + "" + len_v);
 		setSize(BattleField.SIDE*len_h, BattleField.SIDE*len_v);
 	}
 	
@@ -53,6 +52,10 @@ public abstract class Ship extends GImage {
 
 	public int getLen_v() {
 		return len_v;
+	}
+
+	public POSE getPose() {
+		return pose;
 	}
 
 	public boolean isFinal() {

@@ -4,6 +4,10 @@ public class Actor {
 
 	private String name;
 	
+	public String getName() {
+		return name;
+	}
+
 	private BattleField own_bf, enemy_bf;
 	
 	public Actor(String name, BattleField own, BattleField enemy) {
