@@ -25,7 +25,7 @@ public class Cell extends GRect{
 	
 	public void setCellTaken(boolean flag) {
 		setFilled(true);
-		setColor(Color.CYAN);
+		setColor(new Color(1, 159, 209));
 		cellTaken = flag;
 	}
 	

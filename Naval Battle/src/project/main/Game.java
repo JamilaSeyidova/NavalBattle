@@ -12,9 +12,14 @@ import javax.swing.JButton;
 import acm.graphics.GLabel;
 import acm.graphics.GObject;
 import acm.graphics.GPoint;
+import acm.graphics.GRect;
+import acm.graphics.GRoundRect;
 import acm.program.GraphicsProgram;
+import acm.util.RandomGenerator;
 import others.Actor;
 import others.BattleField;
+import others.Cell;
+import others.GameMap;
 import ships.BattleShip;
 import ships.Cruiser;
 import ships.Destroyer;
@@ -24,198 +29,304 @@ import ships.Submarine;
 public class Game extends GraphicsProgram {
 	private static final long serialVersionUID = 1L;
 
-	static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+	public static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
 	public static final int APPLICATION_WIDTH = (int) screenSize.getWidth();
 	public static final int APPLICATION_HEIGHT = (int) screenSize.getHeight();
+	public static final String ACTOR1_NAME = "JAMILA";
+	public static final String ACTOR2_NAME = "PARSHA";
 
-	
+	JButton btn_setup, btn_next, btn_start, btn_random;
 
-	JButton btn_start, btn_next;
-	
 	private boolean gameStarted, testtttttt;
 
 	private GPoint orig, last;
 	private GObject gobj;
-	
+	private Cell currCell = new Cell(0, 0);
+
 //	BattleField actor1.getOwnBF(), bf2;
 	Actor curr_actor, actor1, actor2;
-	
+	Bomb bomb;
+
 	GLabel lbl_gameStatus;
-	
+
 	@Override
 	public void init() {
-		
-		actor1 = new Actor("Tofig", new BattleField(), new BattleField());
-		actor2 = new Actor("Ali", new BattleField(), new BattleField());
-		
+
+		actor1 = new Actor(ACTOR1_NAME, new GameMap(ACTOR1_NAME));
+		actor2 = new Actor(ACTOR2_NAME, new GameMap(ACTOR2_NAME));
 		curr_actor = actor1;
-		
-		add(actor1.getOwnBF(), 0, 0);
-		add(actor1.getEnemyBF(), BattleField.LENGTH + 50, 0);
-		
-		add(actor2.getOwnBF(), 0, 0);
-		add(actor2.getEnemyBF(), BattleField.LENGTH + 50, 0);
-		actor2.getOwnBF().setVisible(false);
-		actor2.getEnemyBF().setVisible(false);
+
+		add(actor1.getGameMap());
+		add(actor2.getGameMap());
+		actor2.getGameMap().setVisible(false);
 		
 		lbl_gameStatus = new GLabel(actor1.getName() + ", set your map ");
 		lbl_gameStatus.setFont("Arial-BOLD-32");
-		lbl_gameStatus.setColor(Color.RED);
+		lbl_gameStatus.setColor(new Color(204, 0, 82));
 		lbl_gameStatus.setLocation(APPLICATION_WIDTH - lbl_gameStatus.getWidth(), lbl_gameStatus.getHeight());
 		lbl_gameStatus.setVisible(false);
 		add(lbl_gameStatus);
 
 //		setLayout(new BorderLayout());
 		// add(new SelectMenu(), BorderLayout.SOUTH);
-		btn_start = new JButton("Start");
+		btn_setup = new JButton("Set Up");
+		btn_random = new JButton("Randomize");
 		btn_next = new JButton("Next");
-		add(btn_start, BorderLayout.SOUTH);
+		btn_start = new JButton("Start");
+		
+		add(btn_setup, BorderLayout.SOUTH);
+		add(btn_random, BorderLayout.SOUTH);
 		add(btn_next, BorderLayout.SOUTH);
+		add(btn_start, BorderLayout.SOUTH);
 		btn_next.setVisible(false);
+		btn_next.setEnabled(false);
+		btn_start.setVisible(false);
 
 //		actor1.getOwnBF() = new BattleField();
 //		bf2 = new BattleField();
-		
-		
-		
 
-		
+		btn_setup.requestFocus();
 
-//		btnStart.requestFocus();
+		add(new JButton("TEST"), BorderLayout.SOUTH); ///////////////////////////////
 
-		
-		
-		add( new JButton("TEST"), BorderLayout.SOUTH); ///////////////////////////////
-		
 		addMouseListeners();
 		addActionListeners();
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if (gobj == null) return;
-		if (! (gobj instanceof Ship) ) return;
-		if (((Ship) gobj).isFinal()) return;
-		
-		((Ship)gobj).rotate();
+		if (gobj == null)
+			return;
+		if (!(gobj instanceof Ship))
+			return;
+		if (((Ship) gobj).isFinal())
+			return;
+
+		((Ship) gobj).rotate();
 	}
-	
+
 	@Override
 	public void mousePressed(MouseEvent e) {
 		last = new GPoint(e.getPoint());
 		gobj = getElementAt(last);
-		
-		if(gobj instanceof Ship) 
+
+		if (gobj instanceof Ship)
 			orig = gobj.getLocation();
 	}
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		if (gobj == null) return;
-		if (! (gobj instanceof Ship) ) return;
-		if (((Ship) gobj).isFinal()) return;
+		if (gobj == null)
+			return;
+		if (!(gobj instanceof Ship))
+			return;
+		if (((Ship) gobj).isFinal())
+			return;
 
-		gobj.move(e.getX()-last.getX(), e.getY()-last.getY());
+		gobj.move(e.getX() - last.getX(), e.getY() - last.getY());
 		last = new GPoint(e.getPoint());
 	}
-	
+
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		if (gobj == null) return;
-		if (! (gobj instanceof Ship) ) return;
+		if (gobj == null)
+			return;
+		if (!(gobj instanceof Ship))
+			return;
+
+		Ship ship = ((Ship) gobj);
 		
-		Ship ship = ((Ship)gobj);
+		BattleField own_bf = curr_actor.getGameMap().getOwn_bf();
+
+		// ship's local coordinate:
+		GPoint ship_glb_coord = ship.getLocation(); 
 		
-		GPoint ship_coord = new GPoint();
-			
-		
-		if(!curr_actor.getOwnBF().canAllocateShip(ship, ship_coord)) {
+		if (!own_bf.canAllocateShip(ship, ship_glb_coord)) {
 			ship.setLocation(orig);
 			return;
 		}
-		
-	
-		curr_actor.getOwnBF().allocateShip(ship, ship_coord);
-		
-		// if vertical and 
+
+		own_bf.allocateShip(ship, ship_glb_coord);
+
 //		gobj.setLocation(ship_coord);
 		ship.setFinal(true);
-		curr_actor.getOwnBF().setAreaTaken(ship, ship_coord);
+		own_bf.setAreaTaken(ship, ship_glb_coord);
 		gobj = null;
+		
+		curr_actor.setNumOfUnloadedShips(curr_actor.getNumOfUnloadedShips()-1);
+		if(actor1.getNumOfUnloadedShips() == 0) 
+			btn_next.setEnabled(true);
+		if(actor2.getNumOfUnloadedShips() == 0) 
+			btn_start.setEnabled(true);
 	}
 
 	@Override
+	public void mouseMoved(MouseEvent e) {
+		if (bomb == null ) return;
+
+		if(!curr_actor.getGameMap().getEnemy_bf().contains(e.getX(), e.getY())) return;
+		
+		bomb.setLocation(e.getX(), e.getY());
+		
+		GPoint bomb_lcl_coord = curr_actor.getGameMap().getEnemy_bf().getLocalPoint(e.getX(), e.getY());
+		
+		
+		currCell.setColor(Color.BLACK);
+		
+		currCell = curr_actor.getGameMap().getEnemy_bf().getCellAt(bomb_lcl_coord);
+		currCell.sendToFront();
+		currCell.setColor(Color.CYAN);
+		
+
+	}
+	
+	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().equals("Start")) {
-			
+		if (e.getActionCommand().equals("Set Up")) {
+
 			loadShipMenu();
-			
+
 			lbl_gameStatus.setVisible(true);
-			gameStarted = true;
-			btn_start.setVisible(false);
+			btn_setup.setVisible(false);
+			btn_random.setVisible(false);
 			btn_next.setVisible(true);
+			btn_next.setEnabled(false);
 		}
+
+		if (e.getActionCommand().equals("Randomize")) {
+			btn_setup.setVisible(false);
+			btn_random.setVisible(false);
+			btn_start.setVisible(true);
+			
+			Ship [] ships = curr_actor.getShips();
+			int i = 0;
+			
+			while(curr_actor.getNumOfUnloadedShips() > 0) {
+				Ship ship = ships[i];
+				
+				if(RandomGenerator.getInstance().nextBoolean())
+					ship.rotate();
+				int x = RandomGenerator.getInstance().nextInt(BattleField.MAP_LEN)*BattleField.SIDE;
+				int y = RandomGenerator.getInstance().nextInt(BattleField.MAP_LEN)*BattleField.SIDE;
+				
+				BattleField own_bf = curr_actor.getGameMap().getOwn_bf();
+
+				// ship's local coordinate:
+				GPoint ship_glb_coord = own_bf.getCanvasPoint(x, y); 
+				
+				if (!own_bf.canAllocateShip(ship, ship_glb_coord)) {
+					continue;
+				}
+
+				own_bf.allocateShip(ship, ship_glb_coord);
+
+//				gobj.setLocation(ship_coord);
+				ship.setFinal(true);
+				own_bf.setAreaTaken(ship, ship_glb_coord);
+				
+				curr_actor.setNumOfUnloadedShips(curr_actor.getNumOfUnloadedShips()-1);
+				i++;
+				
+				if(curr_actor.getNumOfUnloadedShips() == 0) {
+					curr_actor = actor2;
+					ships = curr_actor.getShips();
+					i = 0;
+				}
+			}
+			
+		}
+		
 		
 		if (e.getActionCommand().equals("Next")) {
 			lbl_gameStatus.setLabel(actor2.getName() + ", set your map ");
-			
-			loadShipMenu();
-			
-			actor1.getOwnBF().setVisible(false);
-			actor1.getEnemyBF().setVisible(false);
-			
-			actor2.getOwnBF().setVisible(true);
-			actor2.getEnemyBF().setVisible(true);
+
+			actor1.getGameMap().setVisible(false);
+			actor2.getGameMap().setVisible(true);
+
+			btn_next.setVisible(false);
+			btn_start.setVisible(true);
+			btn_start.setEnabled(false);
 			
 			curr_actor = actor2;
+			
+			loadShipMenu();
 		}
-		
+
+		if (e.getActionCommand().equals("Start")) {
+
+			if(shipArea != null) {
+				remove(shipArea);
+				shipArea = null;
+			}
+			
+			bomb = new Bomb();
+			add(bomb);
+			
+			gameStarted = true;
+			
+			switchTurnTo(actor1);
+			
+			btn_start.setEnabled(false);
+		}
+
 		if (e.getActionCommand().equals("TEST")) {
-			
-			actor1.getOwnBF().setVisible(testtttttt);
-			testtttttt = ! testtttttt;
+
+//			actor1.getGameMap().getOwn_bf().setVisible(testtttttt);
+//			testtttttt = !testtttttt;
+			actor1.getGameMap().setVisible(false);
+			actor2.getGameMap().setVisible(true);
 		}
-			
+
+	}
+
+	private void switchTurnTo(Actor actor) {
+		
+		curr_actor.getGameMap().setVisible(false);
+		
+		curr_actor = actor;
+		
+		curr_actor.getGameMap().setVisible(true);
 	}
 
 	@Override
 	public void run() {
-		while (true) {
+//		while (true) {
 
 //			if (gameStarted) {
 //				showMenu();
 //			}
-			
+
 //			if (testtttttt) {
 //				actor1.getOwnBF().setVisible(false);
 //				testtttttt = false;
 //				System.out.println("llaaa");
 //			}
 
-			pause(10);
-		}
+//			pause(10);
+//		}
 	}
 
+	GRoundRect shipArea;
+
 	void loadShipMenu() {
-		Ship[] ships = new Ship[5];
-		
-		ships[0] = new BattleShip("4.battleship_v.png");
-		
-		ships[1] = new Cruiser("3.cruiser_v.png");
-	
-		ships[2] = new Submarine("2.submarine_v.png");
-		ships[3] = new Submarine("2.submarine_v.png");
-	
-		ships[4] = new Destroyer("1.destroyer_v.png");
-	
-		
+		Ship[] ships = curr_actor.getShips();
+
+		if (shipArea == null) {
+			shipArea = new GRoundRect(18 * BattleField.SIDE, ships[0].getLen_v() * BattleField.SIDE);
+			shipArea.setFilled(true);
+			shipArea.setColor(new Color(1, 159, 209));
+			add(shipArea, 5, APPLICATION_HEIGHT * 0.575);
+		}
+
+		int counter = 1;
 		for (int i = 0; i < ships.length; i++) {
-			add(ships[i], i * 50, APPLICATION_HEIGHT * 0.6);
+			add(ships[i], counter * BattleField.SIDE + i * 5,
+					APPLICATION_HEIGHT * 0.575 + (5 - ships[i].getLen_v()) / 2.0 * BattleField.SIDE);
+			counter += ships[i].getLen_v();
 
 		}
 
-		gameStarted = false;
 	}
 
 	public static void main(String[] args) {
