@@ -19,6 +19,7 @@ import acm.util.RandomGenerator;
 import others.Actor;
 import others.BattleField;
 import others.Cell;
+import others.Cell.CellStatus;
 import others.GameMap;
 import ships.BattleShip;
 import ships.Cruiser;
@@ -29,37 +30,17 @@ import ships.Submarine;
 public class Game extends GraphicsProgram {
 	private static final long serialVersionUID = 1L;
 
-	public static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-
-	public static final int APPLICATION_WIDTH = (int) screenSize.getWidth();
-	public static final int APPLICATION_HEIGHT = (int) screenSize.getHeight();
-	public static final String ACTOR1_NAME = "JAMILA";
-	public static final String ACTOR2_NAME = "PARSHA";
-
-	JButton btn_setup, btn_next, btn_start, btn_random;
-
-	private boolean gameStarted, testtttttt;
-
-	private GPoint orig, last;
-	private GObject gobj;
-	private Cell currCell = new Cell(0, 0);
-
-//	BattleField actor1.getOwnBF(), bf2;
-	Actor curr_actor, actor1, actor2;
-	Bomb bomb;
-
-	GLabel lbl_gameStatus;
-
 	@Override
 	public void init() {
 
 		actor1 = new Actor(ACTOR1_NAME, new GameMap(ACTOR1_NAME));
 		actor2 = new Actor(ACTOR2_NAME, new GameMap(ACTOR2_NAME));
 		curr_actor = actor1;
+		enemy_actor = actor2;
 
-		add(actor1.getGameMap());
-		add(actor2.getGameMap());
-		actor2.getGameMap().setVisible(false);
+		add(curr_actor.getGameMap());
+		add(enemy_actor.getGameMap());
+		enemy_actor.getGameMap().setVisible(false);
 		
 		lbl_gameStatus = new GLabel(actor1.getName() + ", set your map ");
 		lbl_gameStatus.setFont("Arial-BOLD-32");
@@ -83,9 +64,6 @@ public class Game extends GraphicsProgram {
 		btn_next.setEnabled(false);
 		btn_start.setVisible(false);
 
-//		actor1.getOwnBF() = new BattleField();
-//		bf2 = new BattleField();
-
 		btn_setup.requestFocus();
 
 		add(new JButton("TEST"), BorderLayout.SOUTH); ///////////////////////////////
@@ -96,14 +74,31 @@ public class Game extends GraphicsProgram {
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if (gobj == null)
+//		if (gobj == null)
+//			return;
+		if (gobj instanceof Ship && !((Ship) gobj).isFinal()) {
+			((Ship) gobj).rotate();
 			return;
-		if (!(gobj instanceof Ship))
-			return;
-		if (((Ship) gobj).isFinal())
-			return;
+		}
+		
+//		if (!((Ship) gobj).isFinal())
+//			((Ship) gobj).rotate();;
 
-		((Ship) gobj).rotate();
+		
+		if(!gameStarted) return;
+		
+		BattleField enemy_bf = enemy_actor.getGameMap().getOwn_bf();
+		
+		Cell attackedCell = enemy_bf.getCellAt(currCell.getLocation());
+		
+		if(attackedCell.getCellStatus() == CellStatus.SHIP_ORIGINAL) {
+			currCell.setCellStatus(CellStatus.ATTACK_HIT);
+			attackedCell.setCellStatus(CellStatus.SHIP_DESTRYOED);
+		}
+		else if (attackedCell.getCellStatus() == CellStatus.EMPTY) {
+			currCell.setCellStatus(CellStatus.ATTACK_MISS);
+			switchTurnTo(enemy_actor);
+		}
 	}
 
 	@Override
@@ -165,19 +160,27 @@ public class Game extends GraphicsProgram {
 	public void mouseMoved(MouseEvent e) {
 		if (bomb == null ) return;
 
-		if(!curr_actor.getGameMap().getEnemy_bf().contains(e.getX(), e.getY())) return;
+		if(!curr_actor.getGameMap().getEnemy_bf().contains(e.getX(), e.getY())) {
+//			currCell = null;
+			return;
+		}
 		
 		bomb.setLocation(e.getX(), e.getY());
 		
 		GPoint bomb_lcl_coord = curr_actor.getGameMap().getEnemy_bf().getLocalPoint(e.getX(), e.getY());
 		
-		
-		currCell.setColor(Color.BLACK);
-		
+		if(currCell.getCellStatus() == CellStatus.EMPTY) {
+			currCell.setColor(Color.BLACK);
+		}
+			
 		currCell = curr_actor.getGameMap().getEnemy_bf().getCellAt(bomb_lcl_coord);
-		currCell.sendToFront();
-		currCell.setColor(Color.CYAN);
 		
+		if(currCell.getCellStatus() == CellStatus.EMPTY) {
+			currCell.sendToFront();
+			currCell.setColor(Color.CYAN);
+		}
+		
+				
 
 	}
 	
@@ -241,14 +244,17 @@ public class Game extends GraphicsProgram {
 		if (e.getActionCommand().equals("Next")) {
 			lbl_gameStatus.setLabel(actor2.getName() + ", set your map ");
 
-			actor1.getGameMap().setVisible(false);
-			actor2.getGameMap().setVisible(true);
+//			actor1.getGameMap().setVisible(false);
+//			actor2.getGameMap().setVisible(true);
+//			curr_actor = actor2;
+			
+			switchTurnTo(actor2);
 
 			btn_next.setVisible(false);
 			btn_start.setVisible(true);
 			btn_start.setEnabled(false);
 			
-			curr_actor = actor2;
+			
 			
 			loadShipMenu();
 		}
@@ -274,8 +280,7 @@ public class Game extends GraphicsProgram {
 
 //			actor1.getGameMap().getOwn_bf().setVisible(testtttttt);
 //			testtttttt = !testtttttt;
-			actor1.getGameMap().setVisible(false);
-			actor2.getGameMap().setVisible(true);
+			switchTurnTo(enemy_actor);
 		}
 
 	}
@@ -284,6 +289,7 @@ public class Game extends GraphicsProgram {
 		
 		curr_actor.getGameMap().setVisible(false);
 		
+		enemy_actor = curr_actor;
 		curr_actor = actor;
 		
 		curr_actor.getGameMap().setVisible(true);
@@ -291,23 +297,13 @@ public class Game extends GraphicsProgram {
 
 	@Override
 	public void run() {
-//		while (true) {
-
-//			if (gameStarted) {
-//				showMenu();
-//			}
-
-//			if (testtttttt) {
-//				actor1.getOwnBF().setVisible(false);
-//				testtttttt = false;
-//				System.out.println("llaaa");
-//			}
-
-//			pause(10);
-//		}
+		while(true) {
+//			if(gameStarted)
+			
+			pause(2000);
+		}
 	}
 
-	GRoundRect shipArea;
 
 	void loadShipMenu() {
 		Ship[] ships = curr_actor.getShips();
@@ -332,5 +328,29 @@ public class Game extends GraphicsProgram {
 	public static void main(String[] args) {
 		new Game().start();
 	}
+
+	public static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+	public static final int APPLICATION_WIDTH = (int) screenSize.getWidth();
+	public static final int APPLICATION_HEIGHT = (int) screenSize.getHeight();
+	public static final String ACTOR1_NAME = "JAMILA";
+	public static final String ACTOR2_NAME = "PARSHA";
+
+	/* Control variables */
+	boolean gameStarted, testtttttt;
+	
+	/* UI (Swing) variables */
+	JButton btn_setup, btn_next, btn_start, btn_random;
+
+	GPoint orig, last;
+	GObject gobj;
+	GRoundRect shipArea;
+	Cell currCell = new Cell(0, 0);
+	GLabel lbl_gameStatus;
+
+//	BattleField actor1.getOwnBF(), bf2;
+	Actor actor1, actor2;
+	Actor curr_actor, enemy_actor;
+	Bomb bomb;
 
 }

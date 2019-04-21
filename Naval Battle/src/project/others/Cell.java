@@ -5,9 +5,9 @@ import acm.graphics.GRect;
 
 public class Cell extends GRect{
 
-	boolean cellTaken;
+	CellStatus cellStatus;
 	
-	enum CELL_TYPE {
+	public enum CellStatus {
 		EMPTY, 
 		SHIP_ORIGINAL,
 		SHIP_DESTRYOED,
@@ -17,20 +17,44 @@ public class Cell extends GRect{
 	
 	public Cell(double width, double height) {
 		super(width, height);
+		cellStatus = CellStatus.EMPTY;
 	}
 
-	public boolean isCellTaken( ) {
-		return cellTaken;
+	public CellStatus getCellStatus( ) {
+		return cellStatus;
 	}
 	
-	public void setCellTaken(boolean flag) {
-		setFilled(true);
-		setColor(new Color(1, 159, 209));
-		cellTaken = flag;
+	public void setCellStatus(CellStatus cs) {
+		cellStatus = cs;
+		
+		switch (cellStatus) {
+		case EMPTY:
+			setFilled(false);
+			setColor(Color.BLACK);
+			break;
+		case SHIP_ORIGINAL:
+			setFilled(true);
+			setColor(Color.CYAN);
+			break;
+		case SHIP_DESTRYOED:
+			setFilled(true);
+			setColor(Color.RED);
+			break;
+		case ATTACK_HIT:
+			setFilled(true);
+			setColor(Color.BLUE);
+			break;
+		case ATTACK_MISS:
+			setFilled(true);
+			setColor(Color.GRAY);
+			break;
+		}
 	}
+	
+	
 	
 	@Override
 	public String toString() {
-		return "" + cellTaken;
+		return "" + cellStatus;
 	}
 }

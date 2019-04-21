@@ -41,4 +41,5 @@ public class GameMap extends GCompound{
 	}
 
 	
+	
 }

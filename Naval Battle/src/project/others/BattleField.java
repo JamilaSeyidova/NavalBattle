@@ -2,6 +2,7 @@ package others;
 import acm.graphics.GCompound;
 import acm.graphics.GPoint;
 import main.Game;
+import others.Cell.CellStatus;
 import ships.Ship;
 
 public class BattleField extends GCompound {
@@ -55,7 +56,7 @@ public class BattleField extends GCompound {
 		
 		for (int i = row; i < row + s.getLen_h(); i++) {
 			for (int j = col; j < col + s.getLen_v(); j++) {
-				map[i][j].setCellTaken(true);
+				map[i][j].setCellStatus(CellStatus.SHIP_ORIGINAL);;
 			}
 		}
 		
@@ -76,7 +77,7 @@ public class BattleField extends GCompound {
 		
 		for (int i = x/SIDE; i < x/SIDE + ship.getLen_h(); i++) {
 			for (int j = y/SIDE; j < y/SIDE + ship.getLen_v(); j++) {
-				if(map[i][j].isCellTaken())
+				if(map[i][j].getCellStatus() == CellStatus.SHIP_ORIGINAL)
 					return false;
 			}
 		}
@@ -90,6 +91,8 @@ public class BattleField extends GCompound {
 		
 		add(ship, ship_lcl_coord);
 	}
+
+
 	
 	
 }
