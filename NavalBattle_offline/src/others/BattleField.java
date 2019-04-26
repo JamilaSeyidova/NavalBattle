@@ -20,7 +20,7 @@ public class BattleField extends GCompound {
 		
 		for (int row = 0; row < map.length; row++) {
 			for (int col = 0; col < map.length; col++) {
-				Cell c = new Cell(SIDE, SIDE);
+				Cell c = new Cell(SIDE);
 //				c.setFilled(true);
 //				c.setFillColor(Color.WHITE);
 				map[row][col] = c;
@@ -90,6 +90,10 @@ public class BattleField extends GCompound {
 		GPoint ship_lcl_coord = this.getLocalPoint(ship_glb_coord);
 		
 		add(ship, ship_lcl_coord);
+	}
+
+	public void sendCellToFront(Cell attackedCell) {
+		attackedCell.sendToFront();
 	}
 
 

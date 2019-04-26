@@ -7,10 +7,9 @@ public abstract class Ship extends GImage {
 	int len_h, len_v;
 	POSE pose;
 
-
-	boolean isDestroyed;
 	String imageName;
 	boolean isFinal;
+	boolean isDestroyed;
 
 	enum POSE {
 		HORIZONTAL, VERTICAL

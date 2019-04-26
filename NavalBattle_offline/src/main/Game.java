@@ -32,7 +32,8 @@ public class Game extends GraphicsProgram {
 
 	@Override
 	public void init() {
-
+//		rgen.setSeed(1);
+		
 		actor1 = new Actor(ACTOR1_NAME, new GameMap(ACTOR1_NAME));
 		actor2 = new Actor(ACTOR2_NAME, new GameMap(ACTOR2_NAME));
 		curr_actor = actor1;
@@ -94,6 +95,7 @@ public class Game extends GraphicsProgram {
 		if(attackedCell.getCellStatus() == CellStatus.SHIP_ORIGINAL) {
 			currCell.setCellStatus(CellStatus.ATTACK_HIT);
 			attackedCell.setCellStatus(CellStatus.SHIP_DESTRYOED);
+			enemy_bf.sendCellToFront(attackedCell);
 		}
 		else if (attackedCell.getCellStatus() == CellStatus.EMPTY) {
 			currCell.setCellStatus(CellStatus.ATTACK_MISS);
@@ -184,6 +186,7 @@ public class Game extends GraphicsProgram {
 
 	}
 	
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand().equals("Set Up")) {
@@ -208,10 +211,10 @@ public class Game extends GraphicsProgram {
 			while(curr_actor.getNumOfUnloadedShips() > 0) {
 				Ship ship = ships[i];
 				
-				if(RandomGenerator.getInstance().nextBoolean())
+				if(rgen.nextBoolean())
 					ship.rotate();
-				int x = RandomGenerator.getInstance().nextInt(BattleField.MAP_LEN)*BattleField.SIDE;
-				int y = RandomGenerator.getInstance().nextInt(BattleField.MAP_LEN)*BattleField.SIDE;
+				int x = rgen.nextInt(BattleField.MAP_LEN)*BattleField.SIDE;
+				int y = rgen.nextInt(BattleField.MAP_LEN)*BattleField.SIDE;
 				
 				BattleField own_bf = curr_actor.getGameMap().getOwn_bf();
 
@@ -336,6 +339,8 @@ public class Game extends GraphicsProgram {
 	public static final String ACTOR1_NAME = "JAMILA";
 	public static final String ACTOR2_NAME = "PARSHA";
 
+	RandomGenerator rgen = RandomGenerator.getInstance();
+	
 	/* Control variables */
 	boolean gameStarted, testtttttt;
 	
@@ -345,7 +350,7 @@ public class Game extends GraphicsProgram {
 	GPoint orig, last;
 	GObject gobj;
 	GRoundRect shipArea;
-	Cell currCell = new Cell(0, 0);
+	Cell currCell = new Cell(0);
 	GLabel lbl_gameStatus;
 
 //	BattleField actor1.getOwnBF(), bf2;
