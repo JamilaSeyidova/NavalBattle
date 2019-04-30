@@ -1,7 +1,5 @@
 package ships;
 
-import others.BattleField;
-
 public class Cruiser extends Ship {
 	
 	public Cruiser(String name) {

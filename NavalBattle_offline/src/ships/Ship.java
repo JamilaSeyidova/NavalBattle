@@ -11,7 +11,15 @@ public abstract class Ship extends GImage {
 	boolean isFinal;
 	boolean isDestroyed;
 
-	enum POSE {
+	public static enum ShipType {
+		NONE, 
+		DESTROYER,
+		SUBMARINE,
+		CRUISER,
+		BATTLESHIP
+	}
+	
+	public static enum POSE {
 		HORIZONTAL, VERTICAL
 	}
 

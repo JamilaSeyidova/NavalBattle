@@ -10,8 +10,8 @@ public class Cell extends GCompound{
 	GRect rect;
 	GLabel label;
 	CellStatus cellStatus;
-	
-	
+	boolean isInitial;
+
 	public enum CellStatus {
 		EMPTY, 
 		SHIP_ORIGINAL,
@@ -24,6 +24,7 @@ public class Cell extends GCompound{
 		rect = new GRect(side, side);
 		label = new GLabel("", side*0.2, side*0.9);
 		label.setFont("Arial-BOLD-"+(int)side);
+//		isInitial = false;
 		add(rect);
 		add(label);
 //		super(width, height);
@@ -65,7 +66,13 @@ public class Cell extends GCompound{
 		}
 	}
 	
-	
+	public boolean isInitial() {
+		return isInitial;
+	}
+
+	public void setInitial(boolean isInitial) {
+		this.isInitial = isInitial;
+	}
 	
 	@Override
 	public String toString() {

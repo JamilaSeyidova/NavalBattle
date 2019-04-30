@@ -11,7 +11,7 @@ public class BattleField extends GCompound {
 	public static final double COEF = 0.5;
 	
 	private Cell[][] map = new Cell[MAP_LEN][MAP_LEN];
-	
+
 	public static int LENGTH = (int)(Game.APPLICATION_HEIGHT*COEF);
 	public static final int SIDE = LENGTH/10;
 
@@ -28,6 +28,11 @@ public class BattleField extends GCompound {
 				add(map[row][col], row*SIDE, col*SIDE);
 			}
 		}
+	}
+	
+
+	public Cell[][] getMap() {
+		return map;
 	}
 	
 	public Cell getCellAt(GPoint p) {
@@ -88,7 +93,8 @@ public class BattleField extends GCompound {
 	public void allocateShip(Ship ship, GPoint ship_glb_coord) {
 		
 		GPoint ship_lcl_coord = this.getLocalPoint(ship_glb_coord);
-		
+		getCellAt(ship_lcl_coord).setInitial(true);
+//		System.out.println(ship_lcl_coord);
 		add(ship, ship_lcl_coord);
 	}
 
