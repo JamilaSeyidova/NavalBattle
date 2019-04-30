@@ -29,7 +29,7 @@ public class GameMap extends GCompound{
 
 		add(own_bf, BattleField.SIDE, BattleField.SIDE);
 		add(enemy_bf, BattleField.LENGTH+2*BattleField.SIDE, BattleField.SIDE);
-		add(playerName, BattleField.LENGTH + BattleField.SIDE, BattleField.LENGTH+2*BattleField.SIDE);
+//		add(playerName, BattleField.LENGTH + BattleField.SIDE, BattleField.LENGTH+2*BattleField.SIDE);
 	}
 
 	public BattleField getOwn_bf() {

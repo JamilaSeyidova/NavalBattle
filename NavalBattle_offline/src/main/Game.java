@@ -15,7 +15,7 @@ import acm.graphics.GPoint;
 import acm.graphics.GRoundRect;
 import acm.program.GraphicsProgram;
 import acm.util.RandomGenerator;
-import others.AI;
+import others.ArtificialIntelligence;
 import others.Actor;
 import others.BattleField;
 import others.Cell;
@@ -44,11 +44,17 @@ public class Game extends GraphicsProgram {
 		add(curr_actor.getGameMap());
 
 
+		lbl_curActStat = new GLabel(actor1.getName() + ", set your map ");
+		lbl_curActStat.setFont("Arial-BOLD-32");
+		lbl_curActStat.setColor(new Color(204, 0, 82));
+		lbl_curActStat.setLocation(APPLICATION_WIDTH - lbl_curActStat.getWidth(), lbl_curActStat.getHeight());
+		lbl_curActStat.setVisible(false);
+		add(lbl_curActStat);
 		
-		lbl_gameStatus = new GLabel(actor1.getName() + ", set your map ");
+		lbl_gameStatus = new GLabel("");
 		lbl_gameStatus.setFont("Arial-BOLD-32");
 		lbl_gameStatus.setColor(new Color(204, 0, 82));
-		lbl_gameStatus.setLocation(APPLICATION_WIDTH - lbl_gameStatus.getWidth(), lbl_gameStatus.getHeight());
+		lbl_gameStatus.setLocation(APPLICATION_WIDTH - lbl_curActStat.getWidth(), lbl_curActStat.getHeight()*2.5);
 		lbl_gameStatus.setVisible(false);
 		add(lbl_gameStatus);
 
@@ -71,6 +77,7 @@ public class Game extends GraphicsProgram {
 
 		add(new JButton("TEST"), BorderLayout.SOUTH); ///////////////////////////////
 
+		
 		addMouseListeners();
 		addActionListeners();
 	}
@@ -79,7 +86,7 @@ public class Game extends GraphicsProgram {
 	public void mouseClicked(MouseEvent e) {
 //		if (gobj == null)
 //			return;
-		if(curr_actor instanceof AI) return;
+		if(curr_actor instanceof ArtificialIntelligence) return;
 		
 		if (gobj instanceof Ship && !((Ship) gobj).isFinal()) {
 			((Ship) gobj).rotate();
@@ -93,8 +100,9 @@ public class Game extends GraphicsProgram {
 //		Cell [][] map = enemy_bf.getMap();
 		
 		Cell attackedCell = enemy_bf.getCellAt(currCell.getLocation());
+		Cell initCell = attackedCell;
 		
-		System.out.println(currCell.getLocation());
+//		System.out.println(currCell.getLocation());
 		
 		if(attackedCell.getCellStatus() == CellStatus.SHIP_ORIGINAL) {
 			currCell.setCellStatus(CellStatus.ATTACK_HIT);
@@ -102,17 +110,16 @@ public class Game extends GraphicsProgram {
 			enemy_bf.sendCellToFront(attackedCell);
 		
 
-/*
+
 			
 //			for checking all vertical
 			while (gobj instanceof Ship && !attackedCell.isInitial()) {
-				if(((Ship)gobj).getPose() == POSE.VERTICAL) {
-//				?????
-				}
+				if(((Ship)gobj).getPose() == POSE.VERTICAL)
+					initCell.setLocation(initCell.getX(), initCell.getY() - BattleField.SIDE);
 				else
-				{
-//					map[i][j--];
-				}
+					initCell.setLocation(initCell.getX(), initCell.getY() - BattleField.SIDE);				
+			
+//				System.out.println(initCell.getLocation());
 			}
 			
 //			after finding init cell
@@ -120,8 +127,7 @@ public class Game extends GraphicsProgram {
 //			if pose vertical 
 //			iterate through ships len and count hits
 //			num hits == num counted -> ship destroyed
-	
-*/	
+
 
 			curr_actor.setScore(curr_actor.getScore()+10);
 			if(curr_actor.getScore() == 170) {
@@ -135,7 +141,7 @@ public class Game extends GraphicsProgram {
 			attackedCell.setCellStatus(CellStatus.ATTACK_MISS);
 			pause(500);
 			switchTurnTo(enemy_actor);
-			if(curr_actor instanceof AI)
+			if(curr_actor instanceof ArtificialIntelligence)
 				turnOfAI( enemy_actor.getGameMap().getOwn_bf() );
 		}
 	}
@@ -146,7 +152,7 @@ public class Game extends GraphicsProgram {
 		int i = rgen.nextInt(BattleField.MAP_LEN)*BattleField.SIDE;
 		int j = rgen.nextInt(BattleField.MAP_LEN)*BattleField.SIDE;
 		
-		System.out.println(i/BattleField.SIDE + "       " + j/BattleField.SIDE);
+//		System.out.println(i/BattleField.SIDE + "       " + j/BattleField.SIDE);
 		
 		GPoint atck_coor = new GPoint(i, j); 
 		
@@ -180,7 +186,7 @@ public class Game extends GraphicsProgram {
 	@Override
 	public void mousePressed(MouseEvent e) {
 
-		if(curr_actor instanceof AI) return;
+		if(curr_actor instanceof ArtificialIntelligence) return;
 		
 		last = new GPoint(e.getPoint());
 		gobj = getElementAt(last);
@@ -191,7 +197,7 @@ public class Game extends GraphicsProgram {
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		if(curr_actor instanceof AI) return;
+		if(curr_actor instanceof ArtificialIntelligence) return;
 		
 		if (gobj == null)
 			return;
@@ -207,7 +213,7 @@ public class Game extends GraphicsProgram {
 	@Override
 	public void mouseReleased(MouseEvent e) {
 
-		if(curr_actor instanceof AI) return;
+		if(curr_actor instanceof ArtificialIntelligence) return;
 		
 		if (gobj == null)
 			return;
@@ -234,16 +240,21 @@ public class Game extends GraphicsProgram {
 		gobj = null;
 		
 		curr_actor.setNumOfUnloadedShips(curr_actor.getNumOfUnloadedShips()-1);
-		if(actor1.getNumOfUnloadedShips() == 0) 
+		if(actor1.getNumOfUnloadedShips() == 0) {
 			btn_next.setEnabled(true);
-		if(actor2.getNumOfUnloadedShips() == 0) 
+			actor1_ready = true;
+		}
+		if(actor2.getNumOfUnloadedShips() == 0) {
 			btn_start.setEnabled(true);
+			actor2_ready = true;
+			
+		}
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
 
-		if(curr_actor instanceof AI) return;
+		if(curr_actor instanceof ArtificialIntelligence) return;
 		
 		if (bomb == null ) return;
 
@@ -295,8 +306,10 @@ public class Game extends GraphicsProgram {
 			btn_setup.setVisible(true);
 			btn_random.setVisible(true);
 			
-			actor2 = new AI(new GameMap(ROBOT_NAME));
+			actor2 = new ArtificialIntelligence(new GameMap(ROBOT_NAME));
 			enemy_actor = actor2;
+			
+			//random
 //			add(enemy_actor.getGameMap());
 //			enemy_actor.getGameMap().setVisible(false);
 			break;
@@ -304,72 +317,103 @@ public class Game extends GraphicsProgram {
 		case "Set Up":
 			loadShipMenu();
 
-			lbl_gameStatus.setVisible(true);
+			lbl_curActStat.setVisible(true);
+			
 			btn_setup.setVisible(false);
 			btn_random.setVisible(false);
-			btn_next.setVisible(true);
-			btn_next.setEnabled(false);
+			
+			if((actor1_ready == false && actor2_ready == false)) {
+				btn_next.setVisible(true);
+				btn_next.setEnabled(false);
+			}
+			
+			if(enemy_actor instanceof ArtificialIntelligence) {
+				btn_setup.setVisible(false);
+				btn_random.setVisible(false);
+				switchTurnTo(enemy_actor);
+				randomMapSet(curr_actor);
+				btn_start.setVisible(true);
+			}
+			
 			break;
+			
 		case "Randomize":
+			lbl_curActStat.setLabel(curr_actor.getName());
+			lbl_curActStat.setVisible(true);
 			btn_setup.setVisible(false);
 			btn_random.setVisible(false);
 //			btn_start.setVisible(true);
-			btn_next.setVisible(true);
-			btn_next.setEnabled(true);
-			
-			
+			if((actor1_ready == false && actor2_ready == false)){
+				btn_next.setVisible(true);
+				btn_next.setEnabled(true);
+				
+			}
 			randomMapSet(curr_actor);
+			if(actor2_ready) {
+				btn_start.setEnabled(true);
+			}
+			
+			if(enemy_actor instanceof ArtificialIntelligence) {
+				btn_setup.setVisible(false);
+				btn_random.setVisible(false);
+				btn_next.setVisible(false);
+				switchTurnTo(enemy_actor);
+				randomMapSet(curr_actor);
+				btn_start.setVisible(true);
+			}
 			
 			break;
 		
 		case "Next":
-			lbl_gameStatus.setLabel(enemy_actor.getName() + ", set your map ");
+
+			
+			lbl_curActStat.setLabel(enemy_actor.getName() + ", set your map ");
 			
 			switchTurnTo(enemy_actor);
 			
-			if(isMapRandom == true)
-			{
-				btn_random.setVisible(false);
-				btn_setup.setVisible(false);
-				btn_next.setVisible(false);
-				btn_start.setVisible(true);
-				randomMapSet(curr_actor);
-			}
-			else if(curr_actor instanceof Actor) {
-				
-				btn_setup.setVisible(false);
-				btn_random.setVisible(false);
-				
 	
-	//			actor1.getGameMap().setVisible(false);
-	//			actor2.getGameMap().setVisible(true);
-	//			curr_actor = actor2;
-				
-				
-	
-				btn_next.setVisible(false);
-				btn_start.setVisible(true);
-				btn_start.setEnabled(false);
-				
-				loadShipMenu();
-			}
+			btn_random.setVisible(true);
+			btn_setup.setVisible(true);
+			btn_next.setVisible(false);
+			btn_start.setVisible(true);
+			btn_start.setEnabled(false);
+//			randomMapSet(curr_actor);
+
+//			if(curr_actor instanceof Actor) {
+//				
+//				btn_setup.setVisible(false);
+//				btn_random.setVisible(false);
+//				
+//	
+//	//			actor1.getGameMap().setVisible(false);
+//	//			actor2.getGameMap().setVisible(true);
+//	//			curr_actor = actor2;
+//				
+//				
+//	
+//				btn_next.setVisible(false);
+//				btn_start.setVisible(true);
+//				btn_start.setEnabled(false);
+//				
+//				
+//				loadShipMenu();
+//			}
 			break;
 
 		case "Start":
-
 			if(shipArea != null) {
 				remove(shipArea);
 				shipArea = null;
 			}
-			
 			bomb = new Bomb();
 			add(bomb);
 			
 			gameStarted = true;
 			
 			switchTurnTo(actor1);
-			
-			btn_start.setEnabled(false);
+			lbl_curActStat.setVisible(true);
+			lbl_gameStatus.setVisible(true);
+			btn_start.setVisible(false);
 		break;
 
 		case"TEST":
@@ -418,8 +462,10 @@ public class Game extends GraphicsProgram {
 //				ships = curr_actor.getShips();
 //				i = 0;
 //			}
-			
-			isMapRandom = true;
+			if(actor.getName().equals("Jamila"))
+				actor1_ready = true;
+			else
+				actor2_ready = true;
 			
 		}
 		
@@ -427,7 +473,7 @@ public class Game extends GraphicsProgram {
 	
 	private void switchTurnTo(Actor actor) {
 		
-		if(actor instanceof AI) {
+		if(actor instanceof ArtificialIntelligence) {
 			enemy_actor = curr_actor;
 			curr_actor = actor;
 		}else {
@@ -445,16 +491,20 @@ public class Game extends GraphicsProgram {
 	@Override
 	public void run() {
 		while(true) {
-//			if(gameStarted)
+			if(gameStarted) {
+				lbl_curActStat.setLabel(curr_actor.getName()+ "'s score:" + " " + curr_actor.getScore());
+				lbl_gameStatus.setLabel(enemy_actor.getName()+ "'s score:" + " " + enemy_actor.getScore());
+			}
+			
 			if(gameFinished) {
-				lbl_gameStatus.setVisible(true);
-				lbl_gameStatus.setLabel(curr_actor.getName() + " WON");
+				lbl_curActStat.setVisible(true);
+				lbl_curActStat.setLabel(curr_actor.getName() + " WON");
 				pause(5000);
 				exit();
 			}
 				
 			
-			pause(2000);
+			pause(500);
 		}
 	}
 
@@ -494,7 +544,7 @@ public class Game extends GraphicsProgram {
 	RandomGenerator rgen = RandomGenerator.getInstance();
 	
 	/* Control variables */
-	boolean gameStarted, gameFinished, testtttttt, isMapRandom;
+	boolean gameStarted, gameFinished, testtttttt, actor1_ready, actor2_ready;
 	
 	/* UI (Swing) variables */
 	JButton btn_setup, btn_next, btn_start, btn_random, btn_2players, btn_ai;
@@ -503,11 +553,12 @@ public class Game extends GraphicsProgram {
 	GObject gobj;
 	GRoundRect shipArea;
 	Cell currCell = new Cell(0);
-	GLabel lbl_gameStatus;
+	GLabel lbl_gameStatus, lbl_curActStat;
 
 //	BattleField actor1.getOwnBF(), bf2;
 	Actor actor1, actor2;
 	Actor curr_actor, enemy_actor;
 	Bomb bomb;
 
+	
 }
